@@ -1,0 +1,18 @@
+.button-box {
+    spacing: 0px;
+}
+
+.webfind {
+    width: 24px;
+    height: 21px;
+    background-image: url("images/show-webfind.png");
+    padding: 2px;
+}
+
+.webfind:hover {
+    width: 24px;
+    height: 21px;
+    background-image: url("images/show-webfind-hover.png");
+    padding: 2px;
+}
+

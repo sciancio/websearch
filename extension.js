@@ -31,25 +31,16 @@ function SearchButton() {
 
 SearchButton.prototype = {
 
-	__proto__: PanelMenu.SystemStatusButton.prototype,
-
 	_init: function() {
-		PanelMenu.SystemStatusButton.prototype._init.call(this, 'edit-find');
-		
-		this.actor = new St.Button();
+		this.actor = new St.Button({style_class: "webfind", can_focus: true, reactive: true, track_hover: true});
+		let icon = new St.Icon();
+		this.actor.add_actor(icon);
 		this.actor.set_tooltip_text('Click me to google');
-		this.actor.set_size(40, 26);
-
-		this.actor.set_child(new St.Icon({
-				icon_name: 'edit-find',
-				icon_size: 14
-		}));
-		
-		this.actor.connect("clicked", Lang.bind(this, this._searchGoogle));
+		this.actor.connect("clicked", Lang.bind(this, this._webSearch));
 	},
 
 
-	_searchGoogle: function() {
+	_webSearch: function() {
 
 		let clipboard = St.Clipboard.get_default()
 		clipboard.get_text(Lang.bind(this,
@@ -60,29 +51,30 @@ SearchButton.prototype = {
 					return;
 				}
 
-				let googlesearchurl = 'http://www.google.it/search?q=' + escape(text)
-				Util.spawn(['firefox', '--new-tab', googlesearchurl]);
-				
+				let googlesearchurl = 'http://www.google.com/search?q=' + escape(text);
+				Gtk.show_uri(null, googlesearchurl, Gdk.CURRENT_TIME);
+
 				return;
 
 			}));
-
 	}
 
 };
 
-let _indicator;
+
+let _button;
 
 function init() {
-	button = new SearchButton();
+	_button = new SearchButton();
 }
 
 function enable() {
-	_indicator = new SearchButton;
-	Main.panel.addToStatusArea('find-web', _indicator);
+	let _children = Main.panel._rightBox.get_children();
+	Main.panel._rightBox.insert_actor(_button.actor, 0);
+	Main.panel._rightBox.add(_button.actor, 0);
 }
 
 function disable() {
-	_indicator.destroy();
+	Main.panel._rightBox.remove_actor(_button.actor);
 }
 
