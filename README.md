@@ -25,7 +25,7 @@ error message is.
 Current Version
 ========================
 
-Release 0.1.
+Release 0.2.
 
 Other Info
 ========================
