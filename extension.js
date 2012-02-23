@@ -139,7 +139,9 @@ SearchButton.prototype = {
         let clipboard = St.Clipboard.get_default();
         clipboard.get_text(Lang.bind(this,
             function(clipboard, text) {
-                this._inputF.set_text(text);
+            
+                if (text != null)
+                    this._inputF.set_text(text);
 
                 let button = event.get_button();
                 if (button == 1) {                          // Search
