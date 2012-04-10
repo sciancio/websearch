@@ -82,6 +82,7 @@ SearchButton.prototype = {
             style_class: 'input'
         });
         box.add(this._inputF);
+        this._inputF.clutter_text.connect('activate', Lang.bind(this, this._webSearch));
 
         // Search Button
         this._searchButton =  new PopupMenu.PopupMenuItem(_("Search it!"));
@@ -169,6 +170,8 @@ SearchButton.prototype = {
         _searchEngineDefault
         searchurl = _searchEngine[_searchEngineDefault][2] + escape(text);
         Gtk.show_uri(null, searchurl, Gdk.CURRENT_TIME);
+        
+       this.menu.close();
     },
 
 
