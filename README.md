@@ -29,10 +29,6 @@ particular version of the GNOME Shell. If this does not fix
 the problem, use Looking Glass (Alt-F2 lg) to see what the
 error message is.
 
-Current Version
-========================
-
-Release 0.2.
 
 Other Info
 ========================

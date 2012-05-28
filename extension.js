@@ -37,6 +37,7 @@ let _searchEngineDefault = 0;   // Index of used search engine
 let _searchEngine = [ // [<name>, <tooltip>, <searchurl> ]
     ["Google", "Search with Google", "http://www.google.com/search?q="],
     ["Google IT", "Search with Google IT", "http://www.google.it/search?q="],
+    ["Encrypted Google", "Search with encrypted Google", "https://encrypted.google.com/search?q="],
     ["Google Translate", "Translate with Google", "http://translate.google.it/?q="],
     ["DuckDuckGo", "Search with DuckDuckGo", "https://duckduckgo.com/?q="],
     ["Wikipedia", "Search with Wikipedia", "http://en.wikipedia.org/wiki/Special:Search?search="],
@@ -166,12 +167,10 @@ SearchButton.prototype = {
             return;
         }
 
-        let searchurl;
-        _searchEngineDefault
-        searchurl = _searchEngine[_searchEngineDefault][2] + escape(text);
+        let searchurl = _searchEngine[_searchEngineDefault][2] + text;
         Gtk.show_uri(null, searchurl, Gdk.CURRENT_TIME);
-        
-       this.menu.close();
+
+        this.menu.close();
     },
 
 
