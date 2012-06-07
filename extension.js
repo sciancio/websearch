@@ -79,8 +79,7 @@ SearchButton.prototype = {
             name: "searchEntry",
             hint_text: _("Write text to search and click ..."),
             track_hover: true,
-            can_focus: true,
-            style_class: 'input'
+            can_focus: true
         });
         box.add(this._inputF);
         this._inputF.clutter_text.connect('activate', Lang.bind(this, this._webSearch));
@@ -150,6 +149,12 @@ SearchButton.prototype = {
                     this.menu.close();
                     this._webSearch();
                     return;
+                } else {    // Menu open
+                    // Focus on this._inputF
+                    this._inputF.grab_key_focus();
+                    // Select all
+                    this._inputF.clutter_text.set_cursor_visible(true);
+                    this._inputF.clutter_text.set_selection(-1, 0);
                 }
 
         }));
