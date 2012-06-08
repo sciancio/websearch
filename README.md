@@ -35,9 +35,9 @@ Other Info
 
 Copy the string to search in your clipboard (CTRL+C) and click on the find icon.
 
-
 A new tab opens in your preferred browser with results from your preferred search engine.
 
+You can search for text in clipboard (left click) or bring up settings menu (right click).
 
 
 
