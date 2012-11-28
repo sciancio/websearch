@@ -8,7 +8,9 @@ What it looks like?
 
 Some screenshot
 
-![CM extension](http://i.imgur.com/UjnQI.png)
+![CM extension](http://i.imgur.com/OG8mu.png)
+
+![CM extension Prefs](http://i.imgur.com/H3TLA.png)
 
 
 How to install
@@ -37,8 +39,5 @@ Copy the string to search in your clipboard (CTRL+C) and click on the find icon.
 
 A new tab opens in your preferred browser with results from your preferred search engine.
 
-You can search for text in clipboard (left click) or bring up settings menu (right click).
-
-
-
+Configure WebSearch extension with the Gnome Shell Extension Preferences Tool.
 
