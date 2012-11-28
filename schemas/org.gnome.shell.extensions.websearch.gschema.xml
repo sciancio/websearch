@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-websearch">
+  <schema path="/org/gnome/shell/extensions/websearch/" id="org.gnome.shell.extensions.websearch">
+    <key name="ws-switch-button" type="b">
+      <default>false</default>
+      <summary>Switch right/left button mouse</summary>
+      <description>Default->OFF: Right button open textbox; left button start search</description>
+    </key>
+    <key name="ws-clipboard" type="b">
+      <default>false</default>
+      <summary>Search primary or clipboard selection</summary>
+      <description>Default->OFF: search clipboard selection</description>
+    </key>
+    <key name="ws-search" type="as">
+        <default><![CDATA[['<Super>s']]]></default>
+      <summary>Search!</summary>
+      <description>Keybinding to start search</description>
+    </key>
+    <key name="ws-show-textbox" type="as">
+        <default><![CDATA[['<Super>l']]]></default>
+      <summary>Open the text box</summary>
+      <description>Keybinding to open the text box</description>
+    </key>
+    <key name="ws-shift-searchengine" type="as">
+        <default><![CDATA[['<Super>c']]]></default>
+      <summary>Change search engine</summary>
+      <description>Keybinding to change search engine</description>
+    </key>
+    <key type="i" name="ws-searchengine">
+      <default>0</default>
+      <summary>Change search engine</summary>
+      <description>Combo to change search engine</description>
+    </key>
+  </schema>
+</schemalist>
