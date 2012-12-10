@@ -16,6 +16,7 @@
 //   You should have received a copy of the GNU Library General Public
 //   License along with this library; if not, write to the Free Software
 //   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Lang = imports.lang;
 
@@ -179,8 +180,7 @@ const SearchButton = new Lang.Class({
                 // There is non way to capture primary selection in gnome-shell
                 let command = 'python -c "from gi.repository import Gtk, Gdk; import sys; clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY); text = clipboard.wait_for_text(); sys.stdout.write(text);"';
                 let [res, stdout, stderr, status] = GLib.spawn_command_line_sync(command);
-                let selected_text = String.fromCharCode.apply(null, stdout);
-                text = selected_text;
+                text = '' + stdout;
             }
 
             if (text != null)
