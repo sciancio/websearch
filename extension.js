@@ -39,6 +39,8 @@ const Convenience = Me.imports.convenience;
 const Gettext = imports.gettext.domain('gnome-shell-websearch');
 const _ = Gettext.gettext;
 
+const PREFS_DIALOG = 'gnome-shell-extension-prefs websearch@ciancio.net'
+
 let settings = null;
 let extensionPath;
 
@@ -77,6 +79,17 @@ const SearchButton = new Lang.Class({
 
         // Update search engine label
         this._addSearchButton();
+
+        // Separator
+        let menuSepPref = new PopupMenu.PopupSeparatorMenuItem();
+        this.menu.addMenuItem(menuSepPref, 1);
+
+        // Setting Menu
+        let menuPref = new PopupMenu.PopupMenuItem("WebSearch Settings");
+        menuPref.connect('activate', Lang.bind(this, function() {
+                Util.trySpawnCommandLine(PREFS_DIALOG);
+        }));
+        this.menu.addMenuItem(menuPref, 2);
 
         // Keybinding to open websearch menu
         global.display.add_keybinding('ws-show-textbox', settings,
@@ -120,12 +133,10 @@ const SearchButton = new Lang.Class({
         if (this._searchButton) {this._searchButton.destroy(); }
         
         let engine = Convenience.getSearchEngine()[settings.get_int('ws-searchengine')][2]
-        
-        this._searchButton =  new PopupMenu.PopupMenuItem(_(""));
-        this._searchButton.addActor(new St.Label({ text:engine, style_class: "sm-label"}));
+        this._searchButton =  new PopupMenu.PopupMenuItem(engine + " ...");
         
         this._searchButton.connect('activate', Lang.bind(this, this._webSearchFromTextBox));
-        this.menu.addMenuItem(this._searchButton);
+        this.menu.addMenuItem(this._searchButton, 0);
     },
 
 
