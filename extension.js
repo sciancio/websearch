@@ -19,6 +19,7 @@
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Lang = imports.lang;
+const Shell = imports.gi.Shell;
 
 const Gio = imports.gi.Gio;
 
@@ -42,7 +43,6 @@ const _ = Gettext.gettext;
 const PREFS_DIALOG = 'gnome-shell-extension-prefs websearch@ciancio.net'
 
 let settings = null;
-let extensionPath;
 
 const SearchButton = new Lang.Class({
     Name: 'SearchButton',
@@ -86,9 +86,7 @@ const SearchButton = new Lang.Class({
 
         // Setting Menu
         let menuPref = new PopupMenu.PopupMenuItem("WebSearch Settings");
-        menuPref.connect('activate', Lang.bind(this, function() {
-                Util.trySpawnCommandLine(PREFS_DIALOG);
-        }));
+        menuPref.connect('activate', this._LaunchExtensionPrefs);
         this.menu.addMenuItem(menuPref, 2);
 
         // Keybinding to open websearch menu
@@ -123,6 +121,13 @@ const SearchButton = new Lang.Class({
 
     },
 
+
+    _LaunchExtensionPrefs: function() {
+        let appSys = Shell.AppSystem.get_default();
+        let app = appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+        app.launch(global.display.get_current_time_roundtrip(),
+                   ['extension:///' + Me.metadata.uuid], -1, null);
+    },
 
     /*
      * Add Search Button with engine label
@@ -233,10 +238,9 @@ const SearchButton = new Lang.Class({
 let _indicator;
 
 function init(extensionMeta) {
-    extensionPath = extensionMeta.path;
 
     let theme = imports.gi.Gtk.IconTheme.get_default();
-    theme.append_search_path(extensionPath + "/images/");
+    theme.append_search_path(extensionMeta.path + "/images/");
 }
 
 
