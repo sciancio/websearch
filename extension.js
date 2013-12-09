@@ -36,6 +36,7 @@ const Meta = imports.gi.Meta;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Prefs = Me.imports.prefs;
 
 const Gettext = imports.gettext.domain('gnome-shell-websearch');
 const _ = Gettext.gettext;
@@ -46,32 +47,37 @@ let settings = null;
 
 const SearchButton = new Lang.Class({
     Name: 'SearchButton',
-    Extends: PanelMenu.SystemStatusButton,
+    Extends: PanelMenu.Button,
 
     _init: function() {
 
-        this.parent('websearch-symbolic');
+        this.parent(0.0, "Search Button");
+
+        this._box = new St.BoxLayout();
+
+        this._icon = new St.Icon({ gicon: Gio.icon_new_for_string('websearch-symbolic'),
+                                             icon_size: 15 });
+
+        this._bin = new St.Bin({child: this._icon});
+
+        this._box.add(this._bin);
+        this.actor.add_actor(this._box);
+        this.actor.add_style_class_name('panel-status-button');
 
         this._clipboard = St.Clipboard.get_default();
         this._fromTextBox = false;
 
         // Entry
-        let box = new St.BoxLayout(
-        {
-            vertical: true,
-            margin_left: "10",
-            margin_right: "10",
-        });
-        this.menu.addActor(box);
-
+        this.item = new PopupMenu.PopupBaseMenuItem({ activate: false });
         this._inputF = new St.Entry(
         {
             name: "searchEntry",
-            hint_text: _("Write text to search for and click ..."),
+            hint_text: _("Text to search ..."),
             track_hover: true,
             can_focus: true,
         });
-        box.add(this._inputF);
+        this.item.actor.add(this._inputF, { expand: true });
+        this.menu.addMenuItem(this.item, 1)
         this._inputF.clutter_text.connect('activate', Lang.bind(this, this._webSearchFromTextBox));
 
         // Return action on input
@@ -81,43 +87,12 @@ const SearchButton = new Lang.Class({
         this._addSearchButton();
 
         // Separator
-        let menuSepPref = new PopupMenu.PopupSeparatorMenuItem();
-        this.menu.addMenuItem(menuSepPref, 1);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(), 2);
 
         // Setting Menu
         let menuPref = new PopupMenu.PopupMenuItem("WebSearch Settings");
         menuPref.connect('activate', this._LaunchExtensionPrefs);
-        this.menu.addMenuItem(menuPref, 2);
-
-        // Keybinding to open websearch menu
-        global.display.add_keybinding('ws-show-textbox', settings,
-                Meta.KeyBindingFlags.NONE,
-                Lang.bind(this, function () {
-                    this.menu.open();
-                    
-                    // Focus on this._inputF
-                    this._inputF.grab_key_focus();
-                    // Select all
-                    this._inputF.clutter_text.set_cursor_visible(true);
-                    this._inputF.clutter_text.set_selection(-1, 0);
-                }));
-
-        // Keybinding to change search engine
-        global.display.add_keybinding('ws-shift-searchengine', settings,
-                Meta.KeyBindingFlags.NONE,
-                Lang.bind(this, function () {
-                    let new_search_engine_index = (settings.get_int('ws-searchengine') + 1) % 
-                        Convenience.getSearchEngine().length;
-                    settings.set_int('ws-searchengine', new_search_engine_index);
-                    
-                    Main.notify("Websearch: search engine changed in \"" + 
-                        Convenience.getSearchEngine()[settings.get_int('ws-searchengine')][1] + "\"");
-                }));
-
-        // Keybinding to search
-        global.display.add_keybinding('ws-search', settings,
-                Meta.KeyBindingFlags.NONE,
-                Lang.bind(this, this._webSearch));
+        this.menu.addMenuItem(menuPref, 3);
 
     },
 
@@ -141,7 +116,7 @@ const SearchButton = new Lang.Class({
         this._searchButton =  new PopupMenu.PopupMenuItem(engine + " ...");
         
         this._searchButton.connect('activate', Lang.bind(this, this._webSearchFromTextBox));
-        this.menu.addMenuItem(this._searchButton, 0);
+        this.menu.addMenuItem(this._searchButton, 1);
     },
 
 
@@ -183,22 +158,13 @@ const SearchButton = new Lang.Class({
      * Callback clipboard get_text and search
      */
     _getTextCallbackandSearch: function(clipboard, text) {
-    
+
         this.menu.close();
 
         if (this._fromTextBox) {
             text = this._inputF.clutter_text.get_text();
 
         } else {
-
-            // Check for primary or clipboard selection
-            if (settings.get_boolean('ws-clipboard')) {
-                // There is non way to capture primary selection in gnome-shell
-                let command = 'python -c "from gi.repository import Gtk, Gdk; import sys; clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY); text = clipboard.wait_for_text(); sys.stdout.write(text);"';
-                let [res, stdout, stderr, status] = GLib.spawn_command_line_sync(command);
-                text = '' + stdout;
-            }
-
             if (text != null)
                 this._inputF.set_text(text);
         }
@@ -209,7 +175,9 @@ const SearchButton = new Lang.Class({
         }
 
         let searchurl = Convenience.getSearchEngine()[settings.get_int('ws-searchengine')][3] + text;
+
         Gtk.show_uri(null, searchurl, Gdk.CURRENT_TIME);
+
     },
 
 
@@ -218,7 +186,15 @@ const SearchButton = new Lang.Class({
      */
     _webSearch: function() {
         this._fromTextBox = false;
-        this._clipboard.get_text(Lang.bind(this, this._getTextCallbackandSearch));
+        let Typology;
+        
+        if (settings.get_boolean('ws-clipboard')) {
+            Typology = St.ClipboardType.PRIMARY
+        } else {
+            Typology = St.ClipboardType.CLIPBOARD
+        }
+        
+        this._clipboard.get_text(Typology, Lang.bind(this, this._getTextCallbackandSearch));
         return true;
     },
 
@@ -227,8 +203,65 @@ const SearchButton = new Lang.Class({
      */
     _webSearchFromTextBox: function() {
         this._fromTextBox = true;
-        this._clipboard.get_text(Lang.bind(this, this._getTextCallbackandSearch));
+        this._clipboard.get_text(St.ClipboardType.CLIPBOARD, Lang.bind(this, this._getTextCallbackandSearch));
         return true;
+    },
+    
+    enable: function() {
+        Main.wm.addKeybinding(
+            Prefs.SHOWTEXTBOX_SHORTCUT_KEY,
+            settings,
+            Meta.KeyBindingFlags.NONE,
+            Shell.KeyBindingMode.NORMAL |
+            Shell.KeyBindingMode.MESSAGE_TRAY |
+            Shell.KeyBindingMode.OVERVIEW,
+
+
+            Lang.bind(this, function () {
+                this.menu.open();
+                
+                // Focus on this._inputF
+                this._inputF.grab_key_focus();
+                // Select all
+                this._inputF.clutter_text.set_cursor_visible(true);
+                this._inputF.clutter_text.set_selection(-1, 0);
+            })
+        );
+
+        Main.wm.addKeybinding(
+            Prefs.SEARCH_SHORTCUT_KEY,
+            settings,
+            Meta.KeyBindingFlags.NONE,
+            Shell.KeyBindingMode.NORMAL |
+            Shell.KeyBindingMode.MESSAGE_TRAY |
+            Shell.KeyBindingMode.OVERVIEW,
+            
+            Lang.bind(this, this._webSearch)
+        );
+
+        Main.wm.addKeybinding(
+            Prefs.SHIFTSEARCHENGINE_SHORTCUT_KEY,
+            settings,
+            Meta.KeyBindingFlags.NONE,
+            Shell.KeyBindingMode.NORMAL |
+            Shell.KeyBindingMode.MESSAGE_TRAY |
+            Shell.KeyBindingMode.OVERVIEW,
+
+            Lang.bind(this, function () {
+                let new_search_engine_index = (settings.get_int('ws-searchengine') + 1) % 
+                    Convenience.getSearchEngine().length;
+                settings.set_int('ws-searchengine', new_search_engine_index);
+                
+                Main.notify("Websearch: search engine changed in \"" + 
+                    Convenience.getSearchEngine()[settings.get_int('ws-searchengine')][1] + "\"");
+            })
+        );
+    },
+    
+    disable: function() {
+        Main.wm.removeKeybinding(Prefs.SHOWTEXTBOX_SHORTCUT_KEY);
+        Main.wm.removeKeybinding(Prefs.SEARCH_SHORTCUT_KEY);
+        Main.wm.removeKeybinding(Prefs.SHIFTSEARCHENGINE_SHORTCUT_KEY);
     },
 
 });
@@ -245,10 +278,11 @@ function init(extensionMeta) {
 
 
 function enable() {
-    settings = Convenience.getSettings();
 
+    settings = Convenience.getSettings();
     if (!_indicator) {
         _indicator = new SearchButton();
+        _indicator.enable();
         Main.panel.addToStatusArea('web-search', _indicator);
     }
 }
@@ -256,6 +290,7 @@ function enable() {
 
 function disable() {
     if (_indicator) {
+        _indicator.disable();
         _indicator.destroy();
         _indicator = null;
     }

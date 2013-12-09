@@ -31,6 +31,10 @@ const Convenience = Me.imports.convenience;
 
 let settings = null;
 
+const SHOWTEXTBOX_SHORTCUT_KEY = 'ws-show-textbox';
+const SEARCH_SHORTCUT_KEY = 'ws-search';
+const SHIFTSEARCHENGINE_SHORTCUT_KEY = 'ws-shift-searchengine';
+
 
 const WebsearchWindowSettingsWidget = new GObject.Class({
     Name: 'WebSearchWindow.Prefs.WebsearchWindowSettingsWidget',
@@ -77,6 +81,7 @@ const WebsearchWindowSettingsWidget = new GObject.Class({
     */
     _createKeyboardConfig: function(label, bindings) {
         let model = new Gtk.ListStore();
+        let name;
 
         model.set_column_types([
           GObject.TYPE_STRING,
