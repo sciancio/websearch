@@ -98,10 +98,7 @@ const SearchButton = new Lang.Class({
 
 
     _LaunchExtensionPrefs: function() {
-        let appSys = Shell.AppSystem.get_default();
-        let app = appSys.lookup_app('gnome-shell-extension-prefs.desktop');
-        app.launch(global.display.get_current_time_roundtrip(),
-                   ['extension:///' + Me.metadata.uuid], -1, null);
+	Util.spawn(["gnome-shell-extension-prefs", Me.metadata.uuid]);
     },
 
     /*
